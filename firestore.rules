@@ -1,0 +1,95 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // --- Helper Functions ---
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+    
+    function getUserData(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data;
+    }
+    
+    function getRole() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', 'citizen')
+        : 'guest';
+    }
+
+    function hasRole(role) {
+      return getRole() == role;
+    }
+    
+    function isAdmin() {
+      return hasRole('admin');
+    }
+    
+    function isOfficer() {
+      return getRole() in ['officer', 'supervisor', 'manager', 'admin'];
+    }
+
+    function isValidId(id) {
+       return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- Collection Rules ---
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow get: if isSignedIn() && (request.auth.uid == userId || isOfficer());
+      allow list: if isOfficer();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && request.auth.uid == userId 
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['fullName', 'phone', 'address', 'idCard', 'email']);
+      allow update: if isAdmin();
+    }
+
+    // Complaints Collection
+    match /complaints/{complaintId} {
+      allow get: if true;
+      allow list: if true;
+      
+      allow create: if isSignedIn() && request.resource.data.complainantUid == request.auth.uid;
+      allow update: if isSignedIn() && (
+        // Complainant can update pending complaints (selected fields)
+        (resource.data.complainantUid == request.auth.uid && resource.data.status == 'pending' 
+         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'details', 'category', 'severity', 'incidentDate', 'incidentLocation', 'desiredAction', 'evidenceUrls']))
+        || 
+        // Officer update status and notes
+        (isOfficer() && (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'officerNotes', 'assignedOfficerUid', 'department', 'updatedAt', 'logs'])))
+      );
+      allow delete: if isAdmin() || hasRole('supervisor');
+    }
+
+    // Master Data
+    match /categories/{catId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /departments/{depId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Notifications Collection
+    match /notifications/{notifId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid 
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+  }
+}

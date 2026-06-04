@@ -1,0 +1,90 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User account information and roles",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "fullName": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { 
+          "type": "string", 
+          "enum": ["citizen", "officer", "supervisor", "manager", "admin"] 
+        },
+        "idCard": { "type": "string" },
+        "phone": { "type": "string" },
+        "address": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "fullName", "email", "role"]
+    },
+    "Complaint": {
+      "title": "Complaint Record",
+      "description": "Details of an agricultural complaint",
+      "type": "object",
+      "properties": {
+        "trackingId": { "type": "string" },
+        "complainantUid": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "department": { "type": "string" },
+        "severity": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+        "details": { "type": "string" },
+        "incidentDate": { "type": "string", "format": "date-time" },
+        "incidentLocation": { "type": "string" },
+        "involvedPersons": { "type": "string" },
+        "desiredAction": { "type": "string" },
+        "evidenceUrls": { "type": "array", "items": { "type": "string" } },
+        "externalUrl": { "type": "string" },
+        "status": { 
+          "type": "string", 
+          "enum": ["pending", "received", "in_progress", "resolved", "rejected"] 
+        },
+        "assignedOfficerUid": { "type": "string" },
+        "officerNotes": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["trackingId", "complainantUid", "title", "category", "details", "status", "createdAt"]
+    },
+    "Category": {
+      "title": "Agricultural Category",
+      "description": "Master data for types of agricultural issues",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "Department": {
+      "title": "Government Department",
+      "description": "Master data for agencies responsible for resolving issues",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "code": { "type": "string" }
+      },
+      "required": ["name"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Public and private user profiles"
+    },
+    "/complaints/{complaintId}": {
+      "schema": "Complaint",
+      "description": "Collection of all complaints"
+    },
+    "/categories/{categoryId}": {
+      "schema": "Category",
+      "description": "Agricultural categories master data"
+    },
+    "/departments/{departmentId}": {
+      "schema": "Department",
+      "description": "Government departments master data"
+    }
+  }
+}
