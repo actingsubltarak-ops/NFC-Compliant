@@ -1,6 +1,6 @@
 {
   "name": "NFC Complaint",
-  "description": "ระบบรับเรื่องร้องเรียนปัญหาเกษตรกรที่ครอบคลุมทั้งการแจ้งเรื่อง ติดตามสถานะ และแดชบอร์ดสรุปผลสำหรับผู้บริหาร พร้อมเทคโนโลยี AI ช่วยตรวจสอบข้อมูล",
+  "description": "ระบบรับเรื่องร้องเรียนสำหรับเกษตรกร พร้อมเทคโนโลยี AI ช่วยวิเคราะห์และสรุปผลข้อมูล",
   "requestFramePermissions": ["geolocation"],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"

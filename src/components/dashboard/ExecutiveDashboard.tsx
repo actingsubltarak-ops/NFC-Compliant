@@ -373,9 +373,9 @@ export function ExecutiveDashboard() {
     printHiddenElements.forEach(el => (el as HTMLElement).style.display = 'none');
 
     const opt = {
-      margin: [10, 10, 10, 10],
+      margin: [10, 10, 10, 10] as [number, number, number, number],
       filename: `NFC_Executive_Report_${new Date().toISOString().slice(0, 10)}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
+      image: { type: 'jpeg' as const, quality: 0.98 },
       html2canvas: { 
         scale: 2, 
         useCORS: true, 
@@ -383,7 +383,7 @@ export function ExecutiveDashboard() {
         scrollX: 0,
         scrollY: 0
       },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
     };
 
     // Use a promise to show loading state if needed, but for now simple download

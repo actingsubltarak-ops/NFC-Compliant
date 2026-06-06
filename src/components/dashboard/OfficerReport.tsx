@@ -272,9 +272,9 @@ export function OfficerReport() {
     element.style.display = 'block';
 
     const opt = {
-      margin: [10, 10, 10, 10],
+      margin: [10, 10, 10, 10] as [number, number, number, number],
       filename: `NFC_Officer_Report_${new Date().toISOString().slice(0, 10)}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
+      image: { type: 'jpeg' as const, quality: 0.98 },
       html2canvas: { 
         scale: 2, 
         useCORS: true, 
@@ -282,7 +282,7 @@ export function OfficerReport() {
         scrollX: 0,
         scrollY: 0
       },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' as const }
     };
 
     html2pdf().set(opt).from(element).save().then(() => {

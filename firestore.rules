@@ -27,7 +27,7 @@ service cloud.firestore {
     }
     
     function isAdmin() {
-      return hasRole('admin');
+      return (isSignedIn() && (request.auth.token.email == 'actingsublt.arak@gmail.com' || hasRole('admin')));
     }
     
     function isOfficer() {
@@ -53,6 +53,7 @@ service cloud.firestore {
       allow update: if isSignedIn() && request.auth.uid == userId 
                     && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['fullName', 'phone', 'address', 'idCard', 'email']);
       allow update: if isAdmin();
+      allow delete: if isAdmin();
     }
 
     // Complaints Collection

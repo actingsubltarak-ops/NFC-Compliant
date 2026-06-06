@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { collection, getDocs, updateDoc, doc, deleteDoc, getDocsFromServer } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
+import { db, handleFirestoreError, OperationType } from '../../lib/firebase';
 import { UserProfile, UserRole } from '../../types';
 import { useAuth } from '../auth/AuthProvider';
 import { Users, Shield, UserCheck, Search, Filter, Trash2, UserX, Power } from 'lucide-react';
@@ -69,7 +69,7 @@ export function UserManagement() {
     });
   };
 
-  const isAdmin = currentUserProfile?.role === 'admin';
+  const isAdmin = currentUserProfile?.role === 'admin' || currentUserProfile?.email === 'actingsublt.arak@gmail.com';
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -135,7 +135,13 @@ export function UserManagement() {
           showAlert('สำเร็จ', 'ลบผู้ใช้งานเรียบร้อยแล้ว', 'info');
         } catch (err: any) {
           console.error(err);
-          showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถลบข้อมูลผู้ใช้งานได้: ' + (err.message || err), 'danger');
+          const errorMsg = err.message || String(err);
+          if (errorMsg.includes('permission')) {
+              showAlert('เกิดข้อผิดพลาด', 'คุณไม่มีสิทธิ์ในการลบผู้ใช้งานนี้ หรือระบบความปลอดภัยปฏิเสธการเข้าถึง', 'danger');
+          } else {
+              showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถลบข้อมูลผู้ใช้งานได้: ' + errorMsg, 'danger');
+          }
+          handleFirestoreError(err, OperationType.DELETE, `users/${uid}`);
         }
       }
     });
